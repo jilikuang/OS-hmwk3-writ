@@ -4,10 +4,18 @@ No threads, some threads, or all the threads may print along with “Main thread
 2. (5.7)
 
 3. (5.9)
+a.
+
+b.
+
+c.
 
 4. (6.1)
+Equivalent case 1: R2 -> R1 -> R3
+Equivalent case 2: R1 -> R3 -> R2
 
 5. (6.3)
+The minimum number of chopsticks to ensure no deadlocks is n+1. Considering the case with only n chopsticks, the case leading to the deadlock is that each philosopher holds one chopstick and waiting for others. Starting from the circumstance, if one more chopstick is added for them, one of the waiting philosopher can then stop waiting, finish his dining and release his chopsticks. Therefore, wiht n+1 chopsticks, it can be guaranteed that there will be at least one philosopher who is not waiting for chopsticks when all chopsticks are held, which prevents circular waiting.
 
 6. (6.7)
-
+Replacing with readLock/readUnlock will not work, especially under multi-processor environment. The major reason is that, during the searching in the for loop, insert may be invoked by other threads. That is, when writeLock is obtained to do removal, the list is not the current list. There could be an extreme case that when the item to be removed is the head of the old list. In that case, if an item is inserted between the item to be removed is found and the remove function obtains writeLock, the remove function could still consider as the head the item which it is going to remove, even though the item is not the head anymore in the updated list. Thus, the remove function will publish(&head, current->next), which results in deleting two items, one is the head of the old list and the other is the item just inserted. Therefore this method just not works.

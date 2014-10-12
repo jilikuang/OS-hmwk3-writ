@@ -2,6 +2,7 @@
 No threads, some threads, or all the threads may print along with “Main thread done.” printed by the main thread. The main idea is that the main thread will not wait for the other threads done since thread_join was removed. In that case, the main thread could exit directly in its turn even though some other threads are not executed yet. When the main thread terminates, the threads created by it will be terminated as well. Therefore, only the threads that is lucky enough to execute before the main thread exits can print.
 
 2. (5.7)
+Please refer to tsbbq.cpp.
 
 3. (5.9)
 a.

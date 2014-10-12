@@ -1,4 +1,5 @@
 const int MAX = 10;
+const int BOUND = 10;
 
 class BBQ {
 	Lock lock;
@@ -8,6 +9,8 @@ class BBQ {
 	int items[MAX];
 	int front;
 	int nextEmpty;
+	int insertNum;
+	int removeNum
 
 public:
 	BBQ();
@@ -22,11 +25,15 @@ BBQ::BBQ() {
 
 void BBQ::insert(int item) {
 	lock.require();
-	while ((nextEmpty - front) == MAX) {
+	while (((nextEmpty - front) == MAX) ||
+			(insertNum > BOUND)) {
 		itemRemoved.wait(&lock);
 	}
 	items[nextEmpty % MAX] = item;
 	nextEmpty++;
+	insertNum++;
+	if (removeNum > BOUND)
+		removeNum = 0;
 	itemAdded.signal();
 	lock.release();
 }
@@ -35,11 +42,15 @@ int BBQ::remove() {
 	int item;
 
 	lock.acquire();
-	while (front == nextEmpty) {
+	while ((front == nextEmpty) ||
+			(removeNum > BOUND)) {
 		itemAdded.wait(&lock);
 	}
 	item = items[front % MAX];
 	front++;
+	removeNum++;
+	if (insertNum > BOUND)
+		insertNum = 0;
 	itemRemoved.signal();
 	lock.release();
 	return item;

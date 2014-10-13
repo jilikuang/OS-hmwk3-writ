@@ -6,10 +6,13 @@ Please refer to tsbbq.cpp.
 
 3. (5.9)
 a.
+Although there is a protection in acquire(), there is no protection in release(). Therefore, every time release() is invoked, futex_wait() will be invoked, so that the goal of avoiding making expensive system calls is not achieved.
 
 b.
+atomic_inc() is an atomic read-modify-write operation. That is, its operation on the same variable in memory can only be executed by one CPU at one time. The atomic process will be: 1) load the variable from memory to a register, 2) increase the register by one, and 3) restore the value back to memory. When multiple CPUs try to execute atomic_inc() at the same time, they can only execute it in turn, making themselves busy waiting except for the executing one, which causes the slowdown and bursts of CPU usage.
 
 c.
+Although val is operated by atomic_inc, val itself is not declared as atomic_t or volatile, which makes val can be preloaded in registers. In that case, if val is zero and is loaded into two registers of two processors in advance of executing atomic_inc, c = atomic_inc(val) can be zero in both threads, which violates mutual exclusion of this lock.
 
 4. (6.1)
 Equivalent case 1: R2 -> R1 -> R3

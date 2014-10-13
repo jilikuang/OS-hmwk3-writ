@@ -6,13 +6,13 @@ Please refer to tsbbq.cpp.
 
 3. (5.9)
 a.
-Although there is a protection in acquire(), there is no protection in release(). Therefore, every time release() is invoked, futex_wait() will be invoked, so that the goal of avoiding making expensive system calls is not achieved.
+Although there is a protection in acquire(), there is no protection in release(). Therefore, every time release() is invoked, futex_wake() will be invoked, so that the goal of avoiding making expensive system calls is not achieved.
 
 b.
-atomic_inc() is an atomic read-modify-write operation. That is, its operation on the same variable in memory can only be executed by one CPU at one time. The atomic process will be: 1) load the variable from memory to a register, 2) increase the register by one, and 3) restore the value back to memory. When multiple CPUs try to execute atomic_inc() at the same time, they can only execute it in turn, making themselves busy waiting except for the executing one, which causes the slowdown and bursts of CPU usage.
+Assuming there are N threads which try to grab the lock at the same time, the first thread will successfully increase val from 0 and grab the lock. The following N-1 threads will fail to increase val from 0, such that the return values are not 0, and then call the system call, futex_wait(). Since the system call is very expensive, involving CPU mode switching and stacking current states, etc, the CPU will have a lot of work to do during kernel/user mode switch. Therefore, a lot of threads invoking the system call at the same time will severely slow down the process and there will be a heavy load of CPU usage.
 
 c.
-Although val is operated by atomic_inc, val itself is not declared as atomic_t or volatile, which makes val can be preloaded in registers. In that case, if val is zero and is loaded into two registers of two processors in advance of executing atomic_inc, c = atomic_inc(val) can be zero in both threads, which violates mutual exclusion of this lock.
+Although val is operated by atomic_inc, val itself is not declared as atomic_t or volatile, which makes val can be preloaded in registers. In that case, if val is zero and is loaded into two registers of two processors in advance of executing atomic_inc, c = atomic_inc(val) can be zero in both threads, which violates mutual exclusion of this lock. Furthermore, if release() is invoked with following the semantics, the thread can easily consider it has obtain the lock. For example, if a thread call release() first and then call acquire(), it can easily get the lock, since val can be arbitrarily reset in release().
 
 4. (6.1)
 Equivalent case 1: R2 -> R1 -> R3

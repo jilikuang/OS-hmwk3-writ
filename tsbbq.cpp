@@ -21,6 +21,7 @@ public:
 
 BBQ::BBQ() {
 	front = nextEmpty = 0;
+	insertNum = removeNum = 0;
 }
 
 void BBQ::insert(int item) {

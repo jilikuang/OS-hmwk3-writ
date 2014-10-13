@@ -33,8 +33,7 @@ void BBQ::insert(int item) {
 	items[nextEmpty % MAX] = item;
 	nextEmpty++;
 	insertNum++;
-	if (removeNum > BOUND)
-		removeNum = 0;
+	removeNum = 0;
 	itemAdded.signal();
 	lock.release();
 }
@@ -50,8 +49,7 @@ int BBQ::remove() {
 	item = items[front % MAX];
 	front++;
 	removeNum++;
-	if (insertNum > BOUND)
-		insertNum = 0;
+	insertNum = 0;
 	itemRemoved.signal();
 	lock.release();
 	return item;
